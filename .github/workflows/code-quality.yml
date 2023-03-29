@@ -11,6 +11,7 @@ jobs:
       with:
         python-version: 3.x
     - run: pip install --upgrade pip
+    - run: if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - run: pip install "black==23.3.0" pylint==2.17.1
     - run: black .
     - run: pylint ./src
