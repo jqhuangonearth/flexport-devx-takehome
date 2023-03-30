@@ -3,7 +3,6 @@ name: Quality and Tests
 on:
   push:
     branches: [ "main" ]
-    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
 
@@ -25,10 +24,6 @@ jobs:
       run: black .
     - name: Pylint
       run: pylint ./src
-    - name: Pytest
-      run: |
-        PYTHONPATH="${PYTHON_PATH}:./src" python -m pytest -v tests/unit
-        PYTHONPATH="${PYTHON_PATH}:./src" python -m pytest -v tests/functional
   tests:
     runs-on: ubuntu-latest
     name: Tests
@@ -41,12 +36,14 @@ jobs:
       run: |
         pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install coverage==7.2.2
     - name: Pytest
       run: |
-        PYTHONPATH="${PYTHON_PATH}:./src" python -m pytest -v tests/unit
-        PYTHONPATH="${PYTHON_PATH}:./src" python -m pytest -v tests/functional
+        PYTHONPATH="${PYTHON_PATH}:./src" coverage run -m pytest -v tests
+        coverage report
+        coverage html
     - name: Archive code coverage results
       uses: actions/upload-artifact@v3
       with:
         name: code-coverage-report
-        path: output/test/code-coverage.html
+        path: htmlcov/index.html
