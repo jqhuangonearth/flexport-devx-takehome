@@ -1,8 +1,14 @@
-name: Checks
-on: [pull_request]
+name: Pylint, Pytest and CodeCov
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     name: Checks
     steps:
@@ -10,8 +16,16 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: 3.x
-    - run: pip install --upgrade pip
-    - run: if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - run: pip install "black==23.3.0" pylint==2.17.1
-    - run: black .
-    - run: pylint ./src
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install "black==23.3.0" pylint==2.17.1
+    - name: Black formatting
+      run: black .
+    - name: Pylint
+      run: pylint ./src
+    - name: Pytest
+      run: |
+        PYTHONPATH="${PYTHON_PATH}:./src" python -m pytest -v tests/unit
+        PYTHONPATH="${PYTHON_PATH}:./src" python -m pytest -v tests/functional
