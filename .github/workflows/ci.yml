@@ -10,6 +10,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  INTEGRATION_DIR: ./tests/integration
 
 jobs:
   qa:
@@ -162,8 +163,23 @@ jobs:
           kubectl describe services/rps
           export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
           kubectl exec -ti $POD_NAME -- curl 0.0.0.0:5000/health
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install Test Dependencies
+        run: pip install requests
+      - name: Test Application
+        run: |
+          echo "Port forwarding to localhost"
+          kubectl port-forward services/rps 5000:5000 & pf_pid=$!
+          echo $pf_pid
           echo "Start running integration tests"
+          python ${{ env.INTEGRATION_DIR }}/health.py
+          python ${{ env.INTEGRATION_DIR }}/health.py
           echo "End running integration tests"
+          echo "Kill port forwarding process"
+          kill -9 $pf_pid
       - name: Cleanup
         if: always()
         run: |
