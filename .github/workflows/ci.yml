@@ -175,7 +175,7 @@ jobs:
           echo $pf_pid
           echo "Start running integration tests"
           python ${{ env.INTEGRATION_DIR }}/health.py
-          python ${{ env.INTEGRATION_DIR }}/health.py
+          python ${{ env.INTEGRATION_DIR }}/rps.py
           echo "End running integration tests"
           echo "Kill port forwarding process"
           kill -9 $pf_pid
